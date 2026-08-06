@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Supabase MCP Demo - TackPath Lotus OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);
+  --mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+#topbar{height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;
+  background:rgba(2,6,14,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.back{font-family:var(--mono);font-size:0.75rem;color:var(--blue);text-decoration:none;}
+.page-title{font-size:0.9rem;font-weight:700;margin-left:4px;}
+.mock-note{font-family:var(--mono);font-size:0.68rem;color:var(--faint);padding:8px 20px;
+  background:rgba(25,183,239,.05);border-bottom:1px solid rgba(25,183,239,.1);text-align:center;}
+.mock-note b{color:var(--blue);}
+
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 82px);}
+@media(max-width:900px){.layout{grid-template-columns:1fr;height:auto;}}
+
+/* Left panel - the simulated database */
+.db-panel{border-right:1px solid var(--border);overflow-y:auto;padding:20px;}
+.panel-title{font-family:var(--mono);font-size:0.7rem;letter-spacing:.12em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.panel-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.table-block{margin-bottom:20px;}
+.table-name{font-family:var(--mono);font-size:0.72rem;color:var(--blue);margin-bottom:6px;font-weight:700;}
+.db-row{font-family:var(--mono);font-size:0.65rem;color:var(--muted);padding:5px 8px;
+  background:var(--card2);border-radius:5px;margin-bottom:3px;line-height:1.5;}
+.db-row span{color:var(--text);}
+.db-row .status-late{color:var(--orange);}
+.db-row .status-dark{color:var(--red);}
+.db-row .status-ok{color:var(--green);}
+
+/* Right panel - the AI agent conversation */
+.agent-panel{display:flex;flex-direction:column;overflow:hidden;}
+.chat-area{flex:1;overflow-y:auto;padding:20px;}
+.msg{margin-bottom:14px;}
+.msg-role{font-family:var(--mono);font-size:0.62rem;color:var(--faint);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;}
+.msg-role.agent{color:var(--purple);}
+.msg-body{font-size:0.845rem;line-height:1.6;color:var(--text);background:var(--card);
+  border-radius:10px;padding:12px 14px;border:1px solid var(--border);}
+.msg-body.agent{background:rgba(141,92,255,.07);border-color:rgba(141,92,255,.2);}
+.msg-body pre{font-family:var(--mono);font-size:0.7rem;background:var(--card2);
+  border-radius:6px;padding:10px;margin-top:8px;overflow-x:auto;color:var(--green);white-space:pre-wrap;}
+.msg-body .exc-flag{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);
+  font-size:0.65rem;font-weight:700;margin:2px;}
+.msg-body .exc-late{background:rgba(255,150,30,.12);color:var(--orange);}
+.msg-body .exc-dark{background:rgba(255,60,60,.12);color:var(--red);}
+.msg-body .exc-ok{background:rgba(83,255,136,.1);color:var(--green);}
+.typing{display:none;padding:10px 14px;font-family:var(--mono);font-size:0.72rem;
+  color:var(--purple);background:rgba(141,92,255,.07);border:1px solid rgba(141,92,255,.2);
+  border-radius:10px;margin-bottom:14px;}
+.typing.show{display:block;}
+
+.input-area{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;}
+.query-input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:9px;
+  padding:10px 14px;color:var(--text);font-size:0.845rem;font-family:'DM Sans',sans-serif;
+  resize:none;}
+.query-input:focus{outline:none;border-color:rgba(141,92,255,.4);}
+.send-btn{padding:10px 18px;background:rgba(141,92,255,.12);border:1px solid rgba(141,92,255,.3);
+  color:var(--purple);border-radius:9px;cursor:pointer;font-weight:700;font-size:0.845rem;
+  font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.send-btn:hover{background:rgba(141,92,255,.22);}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.preset-btns{padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;}
+.preset{padding:5px 12px;border-radius:6px;background:var(--card2);border:1px solid var(--border);
+  color:var(--muted);font-size:0.72rem;cursor:pointer;font-family:var(--mono);}
+.preset:hover{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="index.html" class="back">&larr; Lotus OS</a>
+  <div class="page-title">Supabase MCP — Phase 1 Proof of Concept</div>
+</div>
+<div class="mock-note"><b>Simulated data only</b> &middot; realistic TackPath job/driver/location schema &middot; AI reasoning is real via Anthropic API &middot; no connection to production database</div>
+
+<div class="layout">
+
+  <!-- Left: simulated database state -->
+  <div class="db-panel">
+    <div class="panel-title">Simulated Database State</div>
+
+    <div class="table-block">
+      <div class="table-name">jobs</div>
+      <div class="db-row">id: <span>job-001</span> &middot; status: <span class="status-late">in_transit</span> &middot; driver: <span>Marcus</span><br/>estimated_delivery_at: <span class="status-late">47 min ago</span> &middot; stops_completed: <span>3/8</span></div>
+      <div class="db-row">id: <span>job-002</span> &middot; status: <span>pending</span> &middot; driver: <span class="status-dark">none</span><br/>created_at: <span class="status-late">22 min ago</span> &middot; pickup: <span>142 Peachtree St NW</span></div>
+      <div class="db-row">id: <span>job-003</span> &middot; status: <span class="status-dark">in_transit</span> &middot; driver: <span>Sarah</span><br/>estimated_delivery_at: <span class="status-ok">18 min from now</span> &middot; stops_completed: <span>5/7</span></div>
+      <div class="db-row">id: <span>job-004</span> &middot; status: <span class="status-ok">delivered</span> &middot; driver: <span>David</span><br/>completed: <span class="status-ok">34 min ago</span> &middot; all stops done</div>
+    </div>
+
+    <div class="table-block">
+      <div class="table-name">driver_locations</div>
+      <div class="db-row">driver: <span>Marcus</span> &middot; lat: <span>33.7590</span> lng: <span>-84.3900</span><br/>updated_at: <span class="status-late">38 min ago</span> &middot; speed: <span>0 mph</span></div>
+      <div class="db-row">driver: <span>Sarah</span> &middot; lat: <span>33.7910</span> lng: <span>-84.3840</span><br/>updated_at: <span class="status-ok">2 min ago</span> &middot; speed: <span>24 mph</span></div>
+      <div class="db-row">driver: <span>David</span> &middot; lat: <span>33.7770</span> lng: <span>-84.4130</span><br/>updated_at: <span class="status-ok">6 min ago</span> &middot; speed: <span>0 mph</span></div>
+    </div>
+
+    <div class="table-block">
+      <div class="table-name">drivers</div>
+      <div class="db-row">name: <span>Marcus</span> &middot; phone: <span>404-555-0101</span></div>
+      <div class="db-row">name: <span>Sarah</span> &middot; phone: <span>404-555-0102</span></div>
+      <div class="db-row">name: <span>David</span> &middot; phone: <span>404-555-0103</span></div>
+    </div>
+
+    <div class="table-block">
+      <div class="table-name">organizations</div>
+      <div class="db-row">name: <span>ABC Couriers</span> &middot; slug: <span>abccouriers</span><br/>tier: <span>Lotus</span> &middot; active drivers: <span>3</span></div>
+    </div>
+  </div>
+
+  <!-- Right: AI agent conversation -->
+  <div class="agent-panel">
+    <div class="chat-area" id="chatArea">
+      <div class="msg">
+        <div class="msg-role agent">Exception Intelligence Agent</div>
+        <div class="msg-body agent">Connected to simulated TackPath database. I can see <b>4 jobs</b>, <b>3 drivers</b>, and real-time location data for the ABC Couriers shift.<br/><br/>Ask me anything about the current state of this operation — exceptions, driver status, which jobs are at risk, or what a recovery plan would look like.</div>
+      </div>
+    </div>
+
+    <div class="preset-btns">
+      <button class="preset" onclick="sendPreset(this)">Are there any exceptions right now?</button>
+      <button class="preset" onclick="sendPreset(this)">What's the status of Marcus?</button>
+      <button class="preset" onclick="sendPreset(this)">Which jobs are at risk of missing their SLA?</button>
+      <button class="preset" onclick="sendPreset(this)">Generate a recovery plan for the worst exception</button>
+      <button class="preset" onclick="sendPreset(this)">What should a Lotus operator do right now?</button>
+    </div>
+
+    <div class="typing" id="typing">Agent is reasoning over the database...</div>
+
+    <div class="input-area">
+      <textarea class="query-input" id="queryInput" rows="2" placeholder="Ask the Exception Intelligence Agent about this shift..."></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendQuery()">Ask →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Simulated database state -- mirrors the visual on the left panel
+const DB = {
+  jobs: [
+    { id:'job-001', title:'Surge Route A', status:'in_transit', driver_name:'Marcus',
+      estimated_delivery_at: new Date(Date.now()-47*60000).toISOString(),
+      stops_completed:3, total_stops:8, pickup_address:'890 Marietta St NW' },
+    { id:'job-002', title:'Peachtree Delivery', status:'pending', driver_name:null,
+      created_at: new Date(Date.now()-22*60000).toISOString(),
+      pickup_address:'142 Peachtree St NW', dropoff_address:'1180 Peachtree St NE' },
+    { id:'job-003', title:'Surge Route B', status:'in_transit', driver_name:'Sarah',
+      estimated_delivery_at: new Date(Date.now()+18*60000).toISOString(),
+      stops_completed:5, total_stops:7, pickup_address:'75 5th St NW' },
+    { id:'job-004', title:'Midtown Run', status:'delivered', driver_name:'David',
+      estimated_delivery_at: new Date(Date.now()-34*60000).toISOString(),
+      stops_completed:4, total_stops:4 },
+  ],
+  driver_locations: [
+    { driver_name:'Marcus', lat:33.7590, lng:-84.3900, updated_at: new Date(Date.now()-38*60000).toISOString(), speed:0 },
+    { driver_name:'Sarah', lat:33.7910, lng:-84.3840, updated_at: new Date(Date.now()-2*60000).toISOString(), speed:24 },
+    { driver_name:'David', lat:33.7770, lng:-84.4130, updated_at: new Date(Date.now()-6*60000).toISOString(), speed:0 },
+  ],
+  drivers: [
+    { name:'Marcus', phone:'404-555-0101' },
+    { name:'Sarah', phone:'404-555-0102' },
+    { name:'David', phone:'404-555-0103' },
+  ],
+  organization: { name:'ABC Couriers', slug:'abccouriers', tier:'Lotus' }
+};
+
+const systemPrompt = `You are the TackPath Exception Intelligence Agent, running inside the Lotus OS. You have direct access to a simulated TackPath database for the ABC Couriers shift.
+
+Current database state (treat this as real data you just queried):
+
+JOBS:
+- job-001: "Surge Route A", status=in_transit, driver=Marcus, estimated_delivery=47 minutes AGO (LATE), stops_completed=3/8
+- job-002: "Peachtree Delivery", status=pending, driver=NONE, created 22 minutes ago (UNASSIGNED past 15-min threshold)
+- job-003: "Surge Route B", status=in_transit, driver=Sarah, estimated_delivery=18 minutes FROM NOW (on track), stops_completed=5/7
+- job-004: "Midtown Run", status=delivered, driver=David, all stops complete
+
+DRIVER LOCATIONS (last GPS update):
+- Marcus: lat=33.7590, lng=-84.3900, last updated 38 minutes ago, speed=0mph (DRIVER DARK - no update in 38 min)
+- Sarah: lat=33.7910, lng=-84.3840, last updated 2 minutes ago, speed=24mph (active, on track)
+- David: lat=33.7770, lng=-84.4130, last updated 6 minutes ago, speed=0mph (delivered, stationary)
+
+DRIVERS ROSTER:
+- Marcus: 404-555-0101
+- Sarah: 404-555-0102 (currently active on job-003)
+- David: 404-555-0103 (job delivered, potentially available)
+
+EXCEPTION THRESHOLDS (same as production TackPath):
+- Late: job is in_transit and past estimated_delivery_at
+- Unassigned: job is pending and created more than 15 minutes ago with no driver
+- Driver Dark: driver has not sent a GPS update in more than 30 minutes
+
+Your role:
+1. Answer questions about the current state of this shift using the real data above
+2. Detect and explain exceptions with specific details (which job, which driver, how long, what's at risk)
+3. Generate honest, specific recovery plans - always noting what software can vs. cannot do (e.g., packages are physically with a dark driver, you cannot reassign them automatically)
+4. Recommend what a Lotus operator should do RIGHT NOW
+5. Be honest about limitations - you can draft messages and suggest actions, but humans must approve and execute
+
+When generating recovery plans, be specific: name the driver, name the stops, draft the actual check-in or client message text, explain the physical reality of the situation. Do not be vague.
+
+Format your responses clearly. Use specific job IDs, driver names, and numbers. When you draft a message, present it in a clearly labeled block.`;
+
+let conversationHistory = [];
+
+async function sendQuery(text){
+  const input = document.getElementById('queryInput');
+  const query = text || input.value.trim();
+  if(!query) return;
+
+  input.value = '';
+  addMessage('Dispatcher', query, false);
+  conversationHistory.push({role:'user', content:query});
+
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('typing').classList.add('show');
+
+  try{
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content && data.content[0] ? data.content[0].text : 'No response received.';
+
+    document.getElementById('typing').classList.remove('show');
+    addMessage('Exception Intelligence Agent', reply, true);
+    conversationHistory.push({role:'assistant', content:reply});
+
+  }catch(e){
+    document.getElementById('typing').classList.remove('show');
+    addMessage('System', 'Error connecting to Anthropic API: '+e.message, true);
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function sendPreset(btn){
+  sendQuery(btn.textContent);
+}
+
+function addMessage(role, text, isAgent){
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="msg-role ${isAgent?'agent':''}">${role}</div>
+    <div class="msg-body ${isAgent?'agent':''}">${formatMessage(text)}</div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function formatMessage(text){
+  // Format code blocks and exception badges
+  return text
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\b(LATE|Late)\b/g, '<span class="exc-flag exc-late">LATE</span>')
+    .replace(/\b(DRIVER DARK|Driver Dark)\b/g, '<span class="exc-flag exc-dark">DRIVER DARK</span>')
+    .replace(/\b(UNASSIGNED|Unassigned)\b/g, '<span class="exc-flag exc-late">UNASSIGNED</span>')
+    .replace(/\b(On Track|ON TRACK)\b/g, '<span class="exc-flag exc-ok">ON TRACK</span>')
+    .replace(/\n/g, '<br/>');
+}
+
+// Allow Enter to send (Shift+Enter for newline)
+document.getElementById('queryInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendQuery(); }
+});
+</script>
+
+</body>
+</html>
