@@ -77,11 +77,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);lin
 .owl-thinking{font-family:var(--mono);font-size:0.72rem;color:var(--gold);padding:8px 0;display:none;}
 .owl-thinking.show{display:block;}
 
+
 #lotus-nav{height:38px;display:flex;align-items:center;padding:0 20px;gap:6px;
-  background:rgba(2,6,14,.97);border-bottom:1px solid rgba(255,150,30,.15);font-family:'DM Mono',monospace;font-size:0.65rem;}
-.lnav-home{color:rgba(255,150,30,.8);text-decoration:none;font-weight:700;letter-spacing:.08em;margin-right:8px;}
-.lnav-sep{color:rgba(255,255,255,.15);margin:0 4px;}
-.lnav-link{color:rgba(238,244,255,.45);text-decoration:none;padding:3px 8px;border-radius:4px;transition:all .15s;}
+  background:rgba(2,6,14,.97);border-bottom:1px solid rgba(255,150,30,.15);font-family:'DM Mono',monospace;font-size:0.65rem;overflow-x:auto;white-space:nowrap;}
+.lnav-home{color:rgba(255,150,30,.8);text-decoration:none;font-weight:700;letter-spacing:.08em;margin-right:8px;flex-shrink:0;}
+.lnav-sep{color:rgba(255,255,255,.15);margin:0 4px;flex-shrink:0;}
+.lnav-link{color:rgba(238,244,255,.45);text-decoration:none;padding:3px 8px;border-radius:4px;transition:all .15s;flex-shrink:0;}
 .lnav-link:hover{color:var(--text,#eef4ff);background:rgba(255,255,255,.05);}
 .lnav-link.active{color:#ff961e;background:rgba(255,150,30,.08);}
 </style>
@@ -91,11 +92,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);lin
   <a class="lnav-home" href="../index.html">LOTUS OS</a>
   <span class="lnav-sep">|</span>
   <a class="lnav-link " href="../index.html">Overview</a>
-  <a class="lnav-link " href="../operator/dashboard.html">Operator Dashboard</a>
+  <a class="lnav-link " href="../operator/dashboard.html">Operator</a>
   <a class="lnav-link " href="../supabase-mcp-demo.html">Exception Agent</a>
-  <a class="lnav-link active" href="index.html">OWL Intelligence</a>
+  <a class="lnav-link  active" href="index.html">OWL</a>
+  <a class="lnav-link " href="../handoff.html">Handoff</a>
+  <a class="lnav-link " href="../clients.html">Clients</a>
 </div>
-
 
 <div id="topbar">
   <a href="../index.html" class="back">&larr; Lotus OS</a>
