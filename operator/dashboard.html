@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Lotus Operator Dashboard - TackPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);
+  --mono:'DM Mono',monospace;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow:hidden;height:100vh;display:flex;flex-direction:column;}
+
+/* Topbar */
+#topbar{height:52px;display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;
+  background:rgba(2,6,14,.97);border-bottom:1px solid var(--border);z-index:100;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-word{font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:500;letter-spacing:2px;}
+.op-badge{font-family:var(--mono);font-size:0.6rem;letter-spacing:.14em;padding:2px 8px;
+  border-radius:4px;background:rgba(255,150,30,.12);border:1px solid rgba(255,150,30,.3);color:var(--orange);text-transform:uppercase;}
+.client-select{font-family:var(--mono);font-size:0.72rem;background:var(--card2);border:1px solid var(--border);
+  color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer;margin-left:8px;}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.clock{font-family:var(--mono);font-size:0.72rem;color:var(--muted);}
+.shift-badge{font-family:var(--mono);font-size:0.6rem;padding:3px 8px;border-radius:4px;
+  background:rgba(83,255,136,.1);border:1px solid rgba(83,255,136,.25);color:var(--green);}
+.tb-btn{padding:5px 12px;border-radius:7px;font-size:0.75rem;font-weight:700;cursor:pointer;
+  font-family:'DM Sans',sans-serif;background:rgba(255,150,30,.1);border:1px solid rgba(255,150,30,.25);color:var(--orange);}
+
+/* Main layout */
+#shell{flex:1;display:grid;grid-template-columns:260px 1fr 320px;overflow:hidden;}
+
+/* Left sidebar */
+#sidebar{border-right:1px solid var(--border);overflow-y:auto;padding:14px;}
+.sb-section{margin-bottom:20px;}
+.sb-lbl{font-family:var(--mono);font-size:0.6rem;letter-spacing:.14em;color:var(--faint);
+  text-transform:uppercase;margin-bottom:8px;}
+.sb-stat{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+  background:var(--card2);border-radius:8px;margin-bottom:4px;font-size:0.8rem;}
+.sb-val{font-family:var(--mono);font-weight:700;}
+.exc-item{padding:8px 10px;background:var(--card2);border-radius:8px;margin-bottom:5px;
+  border-left:2px solid var(--red);cursor:pointer;}
+.exc-item:hover{background:rgba(255,60,60,.08);}
+.exc-item.warn{border-left-color:var(--orange);}
+.exc-title{font-size:0.77rem;font-weight:700;margin-bottom:2px;}
+.exc-sub{font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.driver-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;
+  margin-bottom:4px;background:var(--card2);}
+.driver-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.driver-name{font-size:0.8rem;font-weight:600;flex:1;}
+.driver-status{font-family:var(--mono);font-size:0.62rem;}
+
+/* Main panel */
+#main{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.main-section-title{font-family:var(--mono);font-size:0.65rem;letter-spacing:.12em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+
+/* Job cards */
+.job-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;
+  cursor:pointer;transition:border-color .15s;position:relative;overflow:hidden;}
+.job-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.job-card.in_transit::before{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.job-card.pending::before{background:linear-gradient(90deg,transparent,var(--orange),transparent);}
+.job-card.delivered::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.job-card.exception::before{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.job-card:hover{border-color:rgba(25,183,239,.3);}
+.jc-id{font-family:var(--mono);font-size:0.65rem;color:var(--blue);margin-bottom:6px;}
+.jc-title{font-size:0.88rem;font-weight:700;margin-bottom:4px;}
+.jc-driver{font-size:0.77rem;color:var(--muted);margin-bottom:8px;}
+.jc-progress{height:3px;background:var(--card2);border-radius:2px;margin-bottom:8px;}
+.jc-progress-bar{height:100%;border-radius:2px;background:var(--blue);transition:width .3s;}
+.jc-footer{display:flex;justify-content:space-between;align-items:center;}
+.status-pill{font-family:var(--mono);font-size:0.6rem;padding:2px 7px;border-radius:4px;font-weight:700;}
+.sp-in_transit{background:rgba(25,183,239,.1);color:var(--blue);}
+.sp-pending{background:rgba(255,150,30,.1);color:var(--orange);}
+.sp-delivered{background:rgba(83,255,136,.1);color:var(--green);}
+.sp-exception{background:rgba(255,60,60,.1);color:var(--red);}
+.jc-eta{font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.jc-eta.late{color:var(--red);}
+
+/* Right panel - agent */
+#agent-panel{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.ap-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.ap-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);box-shadow:0 0 8px rgba(141,92,255,.6);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.ap-title{font-size:0.85rem;font-weight:700;}
+.ap-sub{font-family:var(--mono);font-size:0.6rem;color:var(--faint);margin-left:auto;}
+.chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.msg-role{font-family:var(--mono);font-size:0.6rem;color:var(--faint);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
+.msg-role.ag{color:var(--purple);}
+.bubble{font-size:0.8rem;line-height:1.6;padding:9px 11px;border-radius:9px;border:1px solid var(--border);}
+.bubble.ag{background:rgba(141,92,255,.06);border-color:rgba(141,92,255,.2);}
+.bubble.usr{background:var(--card2);}
+.typing{font-family:var(--mono);font-size:0.65rem;color:var(--purple);padding:6px 0;display:none;}
+.typing.show{display:block;}
+.quick-btns{padding:8px 12px;display:flex;gap:5px;flex-wrap:wrap;border-top:1px solid var(--border);}
+.qbtn{font-size:0.65rem;padding:3px 8px;border-radius:5px;background:var(--card2);
+  border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--mono);}
+.qbtn:hover{border-color:var(--purple);color:var(--purple);}
+.inp-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.inp-row textarea{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:7px;
+  padding:7px 9px;color:var(--text);font-size:0.8rem;font-family:'DM Sans',sans-serif;resize:none;}
+.inp-row textarea:focus{outline:none;border-color:rgba(141,92,255,.4);}
+.inp-row button{padding:7px 12px;background:rgba(141,92,255,.1);border:1px solid rgba(141,92,255,.3);
+  color:var(--purple);border-radius:7px;cursor:pointer;font-weight:700;font-size:0.8rem;}
+.inp-row button:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Notification toast */
+#notif{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid rgba(255,60,60,.3);
+  border-radius:10px;padding:12px 16px;font-size:0.82rem;display:none;z-index:1000;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:300px;}
+#notif.show{display:block;}
+#notif .notif-title{font-weight:700;color:var(--red);margin-bottom:4px;font-family:var(--mono);font-size:0.7rem;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <svg width="13" height="24" viewBox="0 0 38 70" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="tpg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5dd4f4"/><stop offset="100%" stop-color="#0e7abf"/></linearGradient></defs>
+      <rect x="0" y="22" width="6" height="26" rx="3" fill="url(#tpg)"/>
+      <rect x="12" y="12" width="6" height="46" rx="3" fill="url(#tpg)" opacity=".75"/>
+      <rect x="24" y="4" width="6" height="62" rx="3" fill="url(#tpg)" opacity=".5"/>
+    </svg>
+    <span class="brand-word"><span style="color:#fff;">TACK</span><span style="color:var(--blue);">PATH</span></span>
+  </div>
+  <div class="op-badge">Lotus Operator</div>
+  <select class="client-select" id="clientSelect" onchange="switchClient()">
+    <option value="abc">ABC Couriers — Atlanta</option>
+    <option value="zelurco">Zelurco LLC — Snellville GA</option>
+    <option value="metro">Metro Dispatch Co — Marietta GA</option>
+  </select>
+  <div class="tb-right">
+    <div class="shift-badge">● Shift Active</div>
+    <div class="clock" id="clock">—</div>
+    <button class="tb-btn" onclick="endShift()">End Shift & Handoff →</button>
+  </div>
+</div>
+
+<div id="shell">
+
+  <!-- Left sidebar -->
+  <div id="sidebar">
+    <div class="sb-section">
+      <div class="sb-lbl">Shift Overview</div>
+      <div class="sb-stat"><span>Jobs total</span><span class="sb-val" id="statTotal">—</span></div>
+      <div class="sb-stat"><span>In transit</span><span class="sb-val" style="color:var(--blue);" id="statTransit">—</span></div>
+      <div class="sb-stat"><span>Delivered</span><span class="sb-val" style="color:var(--green);" id="statDelivered">—</span></div>
+      <div class="sb-stat"><span>Exceptions</span><span class="sb-val" style="color:var(--red);" id="statExc">—</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-lbl">Active Exceptions</div>
+      <div id="excList"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-lbl">Drivers</div>
+      <div id="driverList"></div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div id="main">
+    <div>
+      <div class="main-section-title">Active Jobs</div>
+      <div class="job-grid" id="jobGrid"></div>
+    </div>
+    <div>
+      <div class="main-section-title">Completed Today</div>
+      <div class="job-grid" id="deliveredGrid"></div>
+    </div>
+  </div>
+
+  <!-- Right agent panel -->
+  <div id="agent-panel">
+    <div class="ap-header">
+      <div class="ap-dot"></div>
+      <div class="ap-title">Ops Intelligence</div>
+      <div class="ap-sub">Exception Agent</div>
+    </div>
+    <div class="chat" id="chat">
+      <div>
+        <div class="msg-role ag">Exception Intelligence Agent</div>
+        <div class="bubble ag">Monitoring <span id="agClientName">ABC Couriers</span> shift. I'll flag exceptions automatically and you can ask me anything about the current state. Ready.</div>
+      </div>
+    </div>
+    <div class="typing" id="typing">Reasoning over shift data...</div>
+    <div class="quick-btns">
+      <button class="qbtn" onclick="agentAsk('What exceptions need immediate attention?')">Exceptions?</button>
+      <button class="qbtn" onclick="agentAsk('Summarize the current shift status')">Status</button>
+      <button class="qbtn" onclick="agentAsk('Generate recovery plan for worst exception')">Recovery plan</button>
+      <button class="qbtn" onclick="agentAsk('What should I do right now?')">What now?</button>
+    </div>
+    <div class="inp-row">
+      <textarea id="agentInp" rows="2" placeholder="Ask the agent..."></textarea>
+      <button id="agentSendBtn" onclick="agentSend()">→</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="notif">
+  <div class="notif-title" id="notifTitle">Exception Detected</div>
+  <div id="notifBody"></div>
+</div>
+
+<script>
+const now = Date.now();
+
+const CLIENTS = {
+  abc: {
+    name: 'ABC Couriers',
+    jobs: [
+      {id:'job-001',title:'Surge Route A',status:'exception',driver:'Marcus',stops_done:3,stops_total:8,eta_mins:-47,type:'surge'},
+      {id:'job-002',title:'Peachtree Delivery',status:'pending',driver:null,stops_done:0,stops_total:1,eta_mins:null,created_mins_ago:22,type:'sling'},
+      {id:'job-003',title:'Surge Route B',status:'in_transit',driver:'Sarah',stops_done:5,stops_total:7,eta_mins:18,type:'surge'},
+      {id:'job-004',title:'Midtown Run',status:'delivered',driver:'David',stops_done:4,stops_total:4,eta_mins:null,type:'sling'},
+    ],
+    drivers: [
+      {name:'Marcus',status:'dark',stops_done:3,last_ping_mins:38},
+      {name:'Sarah',status:'active',stops_done:5,last_ping_mins:2},
+      {name:'David',status:'idle',stops_done:4,last_ping_mins:6},
+    ],
+    exceptions: [
+      {type:'driver_dark',title:'Driver Dark — Marcus',sub:'No GPS for 38 min · job-001 at risk',severity:'critical'},
+      {type:'late',title:'Late — job-001',sub:'47 min past ETA · 5 stops remain',severity:'critical'},
+      {type:'unassigned',title:'Unassigned — job-002',sub:'22 min without a driver',severity:'warn'},
+    ]
+  },
+  zelurco: {
+    name: 'Zelurco LLC',
+    jobs: [
+      {id:'job-Z01',title:'Medical Docs Run',status:'in_transit',driver:'James',stops_done:2,stops_total:3,eta_mins:12,type:'sling'},
+      {id:'job-Z02',title:'Warehouse Route',status:'in_transit',driver:'Patricia',stops_done:7,stops_total:10,eta_mins:25,type:'surge'},
+      {id:'job-Z03',title:'Airport Pickup',status:'delivered',driver:'Kevin',stops_done:1,stops_total:1,eta_mins:null,type:'sling'},
+    ],
+    drivers: [
+      {name:'James',status:'active',stops_done:2,last_ping_mins:1},
+      {name:'Patricia',status:'active',stops_done:7,last_ping_mins:3},
+      {name:'Kevin',status:'idle',stops_done:1,last_ping_mins:8},
+    ],
+    exceptions: []
+  },
+  metro: {
+    name: 'Metro Dispatch Co',
+    jobs: [
+      {id:'job-M01',title:'Buckhead Loop',status:'exception',driver:'Linda',stops_done:1,stops_total:6,eta_mins:-15,type:'surge'},
+      {id:'job-M02',title:'Sandy Springs Run',status:'in_transit',driver:'Robert',stops_done:3,stops_total:5,eta_mins:8,type:'surge'},
+    ],
+    drivers: [
+      {name:'Linda',status:'dark',stops_done:1,last_ping_mins:42},
+      {name:'Robert',status:'active',stops_done:3,last_ping_mins:4},
+    ],
+    exceptions: [
+      {type:'driver_dark',title:'Driver Dark — Linda',sub:'No GPS for 42 min · job-M01 at risk',severity:'critical'},
+      {type:'late',title:'Late — job-M01',sub:'15 min past ETA',severity:'critical'},
+    ]
+  }
+};
+
+let currentClient = 'abc';
+let conversationHistory = [];
+let notifShown = {};
+
+function switchClient(){
+  currentClient = document.getElementById('clientSelect').value;
+  conversationHistory = [];
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `<div><div class="msg-role ag">Exception Intelligence Agent</div><div class="bubble ag">Switched to <b>${CLIENTS[currentClient].name}</b>. I'm now monitoring their shift data. ${CLIENTS[currentClient].exceptions.length > 0 ? `<b style="color:var(--red);">${CLIENTS[currentClient].exceptions.length} active exception${CLIENTS[currentClient].exceptions.length!==1?'s':''}</b> detected.` : 'No exceptions right now — shift looks clean.'}</div></div>`;
+  document.getElementById('agClientName').textContent = CLIENTS[currentClient].name;
+  render();
+}
+
+function render(){
+  const client = CLIENTS[currentClient];
+
+  // Stats
+  const active = client.jobs.filter(j=>j.status!=='delivered');
+  const delivered = client.jobs.filter(j=>j.status==='delivered');
+  document.getElementById('statTotal').textContent = client.jobs.length;
+  document.getElementById('statTransit').textContent = client.jobs.filter(j=>j.status==='in_transit'||j.status==='exception').length;
+  document.getElementById('statDelivered').textContent = delivered.length;
+  document.getElementById('statExc').textContent = client.exceptions.length;
+
+  // Exceptions
+  document.getElementById('excList').innerHTML = client.exceptions.length
+    ? client.exceptions.map(e=>`
+        <div class="exc-item ${e.severity==='warn'?'warn':''}" onclick="agentAsk('Tell me about the ${e.title} exception and what I should do')">
+          <div class="exc-title">${e.title}</div>
+          <div class="exc-sub">${e.sub}</div>
+        </div>`).join('')
+    : '<div style="font-size:0.77rem;color:var(--faint);padding:6px 0;">No exceptions right now</div>';
+
+  // Drivers
+  document.getElementById('driverList').innerHTML = client.drivers.map(d=>{
+    const colors = {active:'var(--green)',dark:'var(--red)',idle:'var(--faint)'};
+    const labels = {active:'Active',dark:'DARK',idle:'Idle'};
+    return `<div class="driver-row">
+      <div class="driver-dot" style="background:${colors[d.status]};${d.status==='dark'?'box-shadow:0 0 6px rgba(255,60,60,.7)':''}"></div>
+      <div class="driver-name">${d.name}</div>
+      <div class="driver-status" style="color:${colors[d.status]};">${labels[d.status]}</div>
+    </div>`;
+  }).join('');
+
+  // Job grid
+  document.getElementById('jobGrid').innerHTML = client.jobs.filter(j=>j.status!=='delivered').map(j=>{
+    const pct = j.stops_total ? (j.stops_done/j.stops_total*100) : 0;
+    const isLate = j.eta_mins !== null && j.eta_mins < 0;
+    const statusClass = j.status==='exception'?'exception':j.status;
+    const etaLabel = j.eta_mins===null ? '—' : j.eta_mins < 0 ? `${Math.abs(j.eta_mins)} min late` : `ETA ${j.eta_mins} min`;
+    return `<div class="job-card ${statusClass}" onclick="agentAsk('Tell me about ${j.id} - ${j.title}')">
+      <div class="jc-id">TP-${j.id.slice(-4).toUpperCase()}</div>
+      <div class="jc-title">${j.title}</div>
+      <div class="jc-driver">${j.driver||'⚠ No driver assigned'} · ${j.type}</div>
+      ${j.stops_total>1?`<div class="jc-progress"><div class="jc-progress-bar" style="width:${pct}%"></div></div>`:''}
+      <div class="jc-footer">
+        <span class="status-pill sp-${statusClass}">${j.status.replace('_',' ')}</span>
+        <span class="jc-eta ${isLate?'late':''}">${etaLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Delivered grid
+  document.getElementById('deliveredGrid').innerHTML = client.jobs.filter(j=>j.status==='delivered').map(j=>`
+    <div class="job-card delivered" style="opacity:.55;">
+      <div class="jc-id">TP-${j.id.slice(-4).toUpperCase()}</div>
+      <div class="jc-title">${j.title}</div>
+      <div class="jc-driver">${j.driver} · ${j.stops_done}/${j.stops_total} stops</div>
+      <div class="jc-footer">
+        <span class="status-pill sp-delivered">delivered</span>
+        <span class="jc-eta" style="color:var(--green);">Complete</span>
+      </div>
+    </div>`).join('');
+
+  // Auto-notify critical exceptions
+  const client2 = CLIENTS[currentClient];
+  client2.exceptions.filter(e=>e.severity==='critical').forEach(e=>{
+    const key = currentClient+'-'+e.type+'-'+e.title;
+    if(!notifShown[key]){
+      notifShown[key] = true;
+      showNotif('Exception Detected', e.title + ' — ' + e.sub);
+    }
+  });
+}
+
+function showNotif(title, body){
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifBody').textContent = body;
+  const n = document.getElementById('notif');
+  n.classList.add('show');
+  clearTimeout(n._t);
+  n._t = setTimeout(()=>n.classList.remove('show'), 5000);
+}
+
+const AGENT_SYSTEM = `You are the TackPath Exception Intelligence Agent running inside the Lotus Operator Dashboard. You are assisting a TackPath operator who manages multiple courier companies.
+
+Current client: {{CLIENT_NAME}}
+
+Current shift data:
+{{SHIFT_DATA}}
+
+Exception thresholds: Late = past ETA while in_transit. Unassigned = pending 15+ min with no driver. Driver Dark = no GPS 30+ min.
+
+Your job:
+1. Give concise, specific, actionable answers - the operator is managing an active shift
+2. For exceptions: explain exactly what's wrong, what the physical reality is (can software fix it or does a human need to act?), and what the operator should do right now
+3. For recovery plans: be specific - name drivers, draft actual message text, explain limitations honestly
+4. Keep responses SHORT - 3-5 sentences max unless a recovery plan is requested
+5. The operator approves all actions - never claim to have sent messages or taken actions`;
+
+async function agentAsk(text){ document.getElementById('agentInp').value=text; await agentSend(); }
+
+async function agentSend(){
+  const inp = document.getElementById('agentInp');
+  const q = inp.value.trim();
+  if(!q) return;
+  inp.value='';
+
+  addMsg('Operator', q, false);
+  conversationHistory.push({role:'user', content:q});
+
+  document.getElementById('agentSendBtn').disabled=true;
+  document.getElementById('typing').classList.add('show');
+
+  const client = CLIENTS[currentClient];
+  const shiftData = `
+Jobs: ${client.jobs.map(j=>`${j.id}(${j.status},driver=${j.driver||'none'},stops=${j.stops_done}/${j.stops_total},eta=${j.eta_mins===null?'N/A':j.eta_mins+'min'})`).join(', ')}
+Drivers: ${client.drivers.map(d=>`${d.name}(${d.status},lastPing=${d.last_ping_mins}min)`).join(', ')}
+Exceptions: ${client.exceptions.length ? client.exceptions.map(e=>e.title+' - '+e.sub).join('; ') : 'None'}`;
+
+  const system = AGENT_SYSTEM.replace('{{CLIENT_NAME}}', client.name).replace('{{SHIFT_DATA}}', shiftData);
+
+  try{
+    const endpoint = window.location.hostname.includes('localhost') || window.location.hostname.includes('github.io')
+      ? 'https://api.anthropic.com/v1/messages'
+      : '/.netlify/functions/claude-proxy';
+
+    const r = await fetch(endpoint, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,system,messages:conversationHistory})
+    });
+    const d = await r.json();
+    const reply = d.content?.[0]?.text || 'No response.';
+    document.getElementById('typing').classList.remove('show');
+    addMsg('Exception Intelligence Agent', reply, true);
+    conversationHistory.push({role:'assistant',content:reply});
+  }catch(e){
+    document.getElementById('typing').classList.remove('show');
+    addMsg('System','API error: '+e.message,true);
+  }
+  document.getElementById('agentSendBtn').disabled=false;
+}
+
+function addMsg(role, text, isAgent){
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.innerHTML = `<div class="msg-role ${isAgent?'ag':''}">${role}</div><div class="bubble ${isAgent?'ag':'usr'}">${text.replace(/\n/g,'<br/>')}</div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function endShift(){
+  agentAsk('Generate a complete end-of-shift handoff report for '+CLIENTS[currentClient].name+' including: jobs completed, exceptions encountered and how they were handled, driver performance notes, and anything the next operator needs to know.');
+}
+
+// Clock
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' · ATL';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Initial render
+render();
+
+document.getElementById('agentInp').addEventListener('keydown', e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();agentSend();}
+});
+</script>
+</body>
+</html>
