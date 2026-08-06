@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TackPath Lotus OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);
+  --mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;}
+
+#topbar{height:56px;display:flex;align-items:center;padding:0 20px;gap:14px;
+  background:rgba(2,6,14,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:9px;}
+.brand-word{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:500;letter-spacing:1px;}
+.lotus-badge{font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:.14em;
+  padding:3px 9px;border-radius:5px;background:rgba(255,150,30,.12);border:1px solid rgba(255,150,30,.3);
+  color:var(--orange);text-transform:uppercase;}
+.iso-note{margin-left:auto;font-family:var(--mono);font-size:0.68rem;color:var(--faint);}
+
+.wrap{max-width:1200px;margin:0 auto;padding:40px 24px 80px;}
+
+.hero{margin-bottom:48px;}
+.eyebrow{font-family:var(--mono);font-size:0.7rem;letter-spacing:.18em;color:var(--orange);
+  text-transform:uppercase;margin-bottom:10px;}
+.title{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.5px;margin-bottom:10px;}
+.sub{color:var(--muted);font-size:0.95rem;max-width:680px;line-height:1.7;}
+.thesis{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;
+  color:var(--text);margin-top:16px;padding:16px 20px;border-left:2px solid var(--orange);
+  background:rgba(255,150,30,.05);border-radius:0 8px 8px 0;}
+
+.section-lbl{font-family:var(--mono);font-size:0.72rem;letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;margin:40px 0 16px;}
+
+/* Stack layer cards */
+.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:40px;}
+.stack-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+  position:relative;overflow:hidden;}
+.stack-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stack-card.ready::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.stack-card.progress::before{background:linear-gradient(90deg,transparent,var(--orange),transparent);}
+.stack-card.planned::before{background:linear-gradient(90deg,transparent,var(--faint),transparent);}
+.stack-status{font-family:var(--mono);font-size:0.62rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:10px;}
+.stack-status.ready{background:rgba(83,255,136,.1);color:var(--green);border:1px solid rgba(83,255,136,.25);}
+.stack-status.progress{background:rgba(255,150,30,.1);color:var(--orange);border:1px solid rgba(255,150,30,.25);}
+.stack-status.planned{background:rgba(255,255,255,.05);color:var(--faint);border:1px solid var(--border);}
+.stack-name{font-size:1.05rem;font-weight:700;margin-bottom:6px;}
+.stack-desc{font-size:0.83rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+.stack-detail{font-family:var(--mono);font-size:0.68rem;color:var(--faint);line-height:1.7;}
+.stack-link{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:0.72rem;
+  color:var(--blue);text-decoration:none;}
+.stack-link:hover{color:var(--text);}
+
+/* Phase roadmap */
+.phases{display:flex;flex-direction:column;gap:14px;}
+.phase{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;
+  display:flex;gap:16px;align-items:flex-start;}
+.phase-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:0.77rem;font-weight:700;flex-shrink:0;}
+.phase-num.now{background:rgba(83,255,136,.12);color:var(--green);}
+.phase-num.next{background:rgba(25,183,239,.1);color:var(--blue);}
+.phase-num.later{background:rgba(255,255,255,.05);color:var(--faint);}
+.phase-body{}
+.phase-title{font-weight:700;font-size:0.95rem;margin-bottom:4px;}
+.phase-desc{font-size:0.83rem;color:var(--muted);line-height:1.5;}
+.phase-tag{display:inline-block;font-family:var(--mono);font-size:0.6rem;padding:2px 7px;
+  border-radius:4px;margin-top:8px;background:rgba(255,255,255,.05);color:var(--faint);border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <svg width="15" height="27" viewBox="0 0 38 70" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="tpg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5dd4f4"/><stop offset="100%" stop-color="#0e7abf"/></linearGradient></defs>
+      <rect x="0" y="22" width="6" height="26" rx="3" fill="url(#tpg)"/>
+      <rect x="12" y="12" width="6" height="46" rx="3" fill="url(#tpg)" opacity=".75"/>
+      <rect x="24" y="4" width="6" height="62" rx="3" fill="url(#tpg)" opacity=".5"/>
+    </svg>
+    <span class="brand-word"><span style="color:#fff;">T Ʌ C K </span><span style="color:var(--blue);">P Ʌ T H</span></span>
+  </div>
+  <div class="lotus-badge">Lotus OS</div>
+  <div class="iso-note">Isolated side project &middot; does not touch tackpath.com</div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Side Project &middot; Experimental</div>
+    <div class="title">Lotus OS</div>
+    <div class="sub">Exploring what it takes to turn TackPath Lotus from a managed dispatch tier into a full courier service operating system — one where AI agent pods run dispatch, fleet, billing, CRM, and revenue intelligence together, coordinated through a single workspace where humans retain approval authority.</div>
+    <div class="thesis">The shift from alerting to acting, with humans in the loop.</div>
+  </div>
+
+  <div class="section-lbl">The Stack</div>
+  <div class="stack-grid">
+
+    <div class="stack-card ready">
+      <div class="stack-status ready">Ready Now</div>
+      <div class="stack-name">Supabase MCP</div>
+      <div class="stack-desc">Official MCP server that gives AI agents direct natural-language access to TackPath's real Postgres database — jobs, drivers, locations, exceptions — without custom fetch wrappers.</div>
+      <div class="stack-detail">
+        @supabase/mcp-server · Read-only for monitoring agents<br/>
+        Write access gated behind human approval only<br/>
+        Zero config: OAuth auth, no long-lived secrets
+      </div>
+      <a href="supabase-mcp-demo.html" class="stack-link">View demo &rarr;</a>
+    </div>
+
+    <div class="stack-card ready">
+      <div class="stack-status ready">Ready Now</div>
+      <div class="stack-name">MCP Protocol</div>
+      <div class="stack-desc">Universal connector between pods and external services. No custom glue code per integration. 1000+ community servers already exist for Stripe, Slack, GitHub, and more.</div>
+      <div class="stack-detail">
+        Developed by Anthropic, adopted by every major AI lab<br/>
+        USB-C for AI agents — one standard, any model<br/>
+        TackPath pods can expose their own MCP servers
+      </div>
+    </div>
+
+    <div class="stack-card ready">
+      <div class="stack-status ready">Ready Now</div>
+      <div class="stack-name">Claude (Anthropic API)</div>
+      <div class="stack-desc">Already live in TackPath today. Powers the reasoning inside each pod — exception detection, recovery plan generation, client message drafting, revenue intelligence.</div>
+      <div class="stack-detail">
+        claude-sonnet-4-6 · Already in production<br/>
+        Model-agnostic via MCP — swap without rewriting<br/>
+        Haiku for speed-sensitive tasks, Sonnet for reasoning
+      </div>
+    </div>
+
+    <div class="stack-card progress">
+      <div class="stack-status progress">In Progress</div>
+      <div class="stack-name">Twilio</div>
+      <div class="stack-desc">Real SMS/voice notifications that reach drivers and clients on their actual phones. The layer that makes driver check-ins and client delay notifications genuinely real rather than messages sitting in a database.</div>
+      <div class="stack-detail">
+        SMS to drivers: check-in, job alert, route update<br/>
+        SMS to clients: delay notification, ETA update, POD<br/>
+        98% open rate vs email; being wired up separately
+      </div>
+    </div>
+
+    <div class="stack-card planned">
+      <div class="stack-status planned">Planned</div>
+      <div class="stack-name">n8n</div>
+      <div class="stack-desc">Visual workflow automation engine that orchestrates sequences between pods. When an exception fires, n8n coordinates the full recovery sequence — without touching any production code.</div>
+      <div class="stack-detail">
+        Open source · Self-hostable · Production-ready<br/>
+        Visual, auditable, changeable without code changes<br/>
+        Native AI agent nodes + LangChain support in 2026
+      </div>
+    </div>
+
+    <div class="stack-card planned">
+      <div class="stack-status planned">Planned — Watch for 1.0</div>
+      <div class="stack-name">Buzz (Block)</div>
+      <div class="stack-desc">Shared workspace where TackPath operators and AI agent pods work in the same channels. Agents surface recovery plans, operators approve. Full context, full audit trail.</div>
+      <div class="stack-detail">
+        Launched July 21, 2026 · Pre-1.0 · Free &amp; open source<br/>
+        Built on Nostr protocol · Self-hostable<br/>
+        Model-agnostic: Claude, Codex, Goose all supported
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-lbl">Build Phases</div>
+  <div class="phases">
+
+    <div class="phase">
+      <div class="phase-num now">01</div>
+      <div class="phase-body">
+        <div class="phase-title">Supabase MCP Proof of Concept</div>
+        <div class="phase-desc">Connect Claude directly to the TackPath Supabase database via the official MCP server. Verify that an agent can query real job data, real driver locations, and real exception history using natural language. Read-only, scoped to the TackPath project. This is the data foundation everything else depends on.</div>
+        <div class="phase-tag">Building now</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num next">02</div>
+      <div class="phase-body">
+        <div class="phase-title">Exception Intelligence Agent (real data)</div>
+        <div class="phase-desc">Rebuild exception detection (Late, Unassigned, Driver Dark) as a real agent using the Supabase MCP connection. Same logic as dispatcher.html, but the agent reasons over live data rather than a pre-fetched JavaScript array. Generate a real recovery plan with real driver options from the real roster.</div>
+        <div class="phase-tag">After Phase 1</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num next">03</div>
+      <div class="phase-body">
+        <div class="phase-title">n8n Recovery Workflow</div>
+        <div class="phase-desc">Wire the exception detection into an n8n workflow: detect exception → query available drivers → draft recovery messages → surface for human approval. The workflow engine that connects detection to action, visually and auditably, without touching production code.</div>
+        <div class="phase-tag">After Phase 2</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num next">04</div>
+      <div class="phase-body">
+        <div class="phase-title">Twilio Integration</div>
+        <div class="phase-desc">Wire Twilio into the n8n workflow so approved messages actually reach drivers and clients on their phones. Driver check-in SMS, client delay notification SMS. This is the step that makes everything above genuinely real rather than theoretical.</div>
+        <div class="phase-tag">After Phase 3 · Twilio in progress separately</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num later">05</div>
+      <div class="phase-body">
+        <div class="phase-title">Buzz Integration</div>
+        <div class="phase-desc">Wire the full workflow into a Buzz channel so detection, recovery plan, approval, and execution all happen in one shared workspace with full context and audit trail. Timing depends on Buzz reaching a stable 1.0 — pre-1.0 as of August 2026.</div>
+        <div class="phase-tag">When Buzz hits 1.0</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num later">06</div>
+      <div class="phase-body">
+        <div class="phase-title">Full Lotus OS — Billing, CRM, OWL</div>
+        <div class="phase-desc">Expand beyond exception recovery to cover the full courier service OS: OWL revenue intelligence, per-client margin flagging, draft invoice generation, client relationship signals, capacity planning alerts. All coordinated through the same workspace, all with human approval gates.</div>
+        <div class="phase-tag">Phase 5 complete first</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
