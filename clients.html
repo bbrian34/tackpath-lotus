@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Client Status - TackPath Lotus OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);--mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+#topbar{height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.back{font-family:var(--mono);font-size:0.72rem;color:var(--blue);text-decoration:none;}
+.page-badge{font-family:var(--mono);font-size:0.6rem;letter-spacing:.14em;padding:2px 8px;
+  border-radius:4px;background:rgba(25,183,239,.1);border:1px solid rgba(25,183,239,.25);color:var(--blue);text-transform:uppercase;}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+
+.client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:28px;}
+.client-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;
+  position:relative;overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.client-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.client-card.healthy::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.client-card.watch::before{background:linear-gradient(90deg,transparent,var(--orange),transparent);}
+.client-card.risk::before{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.client-card:hover{border-color:rgba(25,183,239,.25);}
+.cc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.cc-name{font-weight:700;font-size:0.95rem;}
+.cc-type{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-top:2px;}
+.cc-status{font-family:var(--mono);font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:5px;}
+.cs-healthy{background:rgba(83,255,136,.1);color:var(--green);}
+.cs-watch{background:rgba(255,150,30,.1);color:var(--orange);}
+.cs-risk{background:rgba(255,60,60,.1);color:var(--red);}
+.cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
+.cc-stat{background:var(--card2);border-radius:6px;padding:7px;text-align:center;}
+.cc-stat-val{font-size:1.1rem;font-weight:800;}
+.cc-stat-lbl{font-family:var(--mono);font-size:0.55rem;color:var(--muted);text-transform:uppercase;}
+.cc-insight{font-size:0.77rem;color:var(--muted);line-height:1.4;border-top:1px solid var(--border);padding-top:10px;}
+.cc-insight b{color:var(--text);}
+.margin-bar{height:4px;background:var(--card2);border-radius:2px;margin-top:8px;overflow:hidden;}
+.margin-fill{height:100%;border-radius:2px;}
+
+.detail-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:none;}
+.detail-panel.show{display:block;}
+.detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.detail-title{font-size:1.1rem;font-weight:800;}
+.detail-close{background:transparent;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.detail-section{background:var(--card2);border-radius:10px;padding:14px;}
+.ds-title{font-family:var(--mono);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.ds-body{font-size:0.82rem;line-height:1.6;color:var(--text);}
+
+#lotus-nav{height:38px;display:flex;align-items:center;padding:0 20px;gap:6px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid rgba(255,150,30,.15);font-family:'DM Mono',monospace;font-size:0.65rem;overflow-x:auto;white-space:nowrap;}
+.lnav-home{color:rgba(255,150,30,.8);text-decoration:none;font-weight:700;letter-spacing:.08em;margin-right:8px;flex-shrink:0;}
+.lnav-sep{color:rgba(255,255,255,.15);margin:0 4px;flex-shrink:0;}
+.lnav-link{color:rgba(238,244,255,.45);text-decoration:none;padding:3px 8px;border-radius:4px;transition:all .15s;flex-shrink:0;}
+.lnav-link:hover{color:var(--text,#eef4ff);background:rgba(255,255,255,.05);}
+.lnav-link.active{color:#ff961e;background:rgba(255,150,30,.08);}
+</style>
+</head>
+<body>
+<div id="lotus-nav">
+  <a class="lnav-home" href="index.html">LOTUS OS</a>
+  <span class="lnav-sep">|</span>
+  <a class="lnav-link " href="index.html">Overview</a>
+  <a class="lnav-link " href="operator/dashboard.html">Operator</a>
+  <a class="lnav-link " href="supabase-mcp-demo.html">Exception Agent</a>
+  <a class="lnav-link " href="owl/index.html">OWL</a>
+  <a class="lnav-link " href="handoff.html">Handoff</a>
+  <a class="lnav-link  active" href="clients.html">Clients</a>
+</div>
+
+
+<div id="topbar">
+  <a href="index.html" class="back">&larr; Lotus OS</a>
+  <div class="page-badge">Client Status</div>
+  <span style="font-family:var(--mono);font-size:0.68rem;color:var(--faint);margin-left:4px;">Week of Aug 4–10, 2026 · Simulated data</span>
+</div>
+
+<div class="wrap">
+  <div style="margin-bottom:20px;">
+    <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:.14em;color:var(--blue);text-transform:uppercase;margin-bottom:6px;">Weekly Overview</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">Client Status Dashboard</div>
+    <div style="font-size:0.875rem;color:var(--muted);">What each courier company's operation looks like this week. Click any client for details.</div>
+  </div>
+
+  <div class="client-grid">
+
+    <div class="client-card healthy" onclick="showDetail('abc')">
+      <div class="cc-header">
+        <div><div class="cc-name">ABC Couriers</div><div class="cc-type">Lotus · Atlanta metro</div></div>
+        <div class="cc-status cs-healthy">Healthy</div>
+      </div>
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--green);">94%</div><div class="cc-stat-lbl">On-Time</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--blue);">184</div><div class="cc-stat-lbl">Deliveries</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--orange);">3</div><div class="cc-stat-lbl">Exceptions</div></div>
+      </div>
+      <div class="cc-insight">Overall strong week. <b>1 Driver Dark incident</b> (Marcus) resolved within 45 min. Revenue on track. No client complaints.</div>
+      <div class="margin-bar"><div class="margin-fill" style="width:23%;background:var(--green);"></div></div>
+    </div>
+
+    <div class="client-card watch" onclick="showDetail('zelurco')">
+      <div class="cc-header">
+        <div><div class="cc-name">Zelurco LLC</div><div class="cc-type">Lotus · Snellville GA</div></div>
+        <div class="cc-status cs-watch">Watch</div>
+      </div>
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--orange);">87%</div><div class="cc-stat-lbl">On-Time</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--blue);">92</div><div class="cc-stat-lbl">Deliveries</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--orange);">7</div><div class="cc-stat-lbl">Exceptions</div></div>
+      </div>
+      <div class="cc-insight"><b>Exception rate climbing</b> — 7 this week vs 3 last week. Thursday medical routes generating most issues. Driver availability thin on Friday mornings.</div>
+      <div class="margin-bar"><div class="margin-fill" style="width:15%;background:var(--orange);"></div></div>
+    </div>
+
+    <div class="client-card risk" onclick="showDetail('metro')">
+      <div class="cc-header">
+        <div><div class="cc-name">Metro Dispatch Co</div><div class="cc-type">Lotus · Marietta GA</div></div>
+        <div class="cc-status cs-risk">At Risk</div>
+      </div>
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--red);">71%</div><div class="cc-stat-lbl">On-Time</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--blue);">58</div><div class="cc-stat-lbl">Deliveries</div></div>
+        <div class="cc-stat"><div class="cc-stat-val" style="color:var(--red);">12</div><div class="cc-stat-lbl">Exceptions</div></div>
+      </div>
+      <div class="cc-insight"><b>Linda's second Driver Dark incident this week.</b> Client has sent 2 complaint emails. Churn risk elevated. Needs account manager outreach today.</div>
+      <div class="margin-bar"><div class="margin-fill" style="width:7%;background:var(--red);"></div></div>
+    </div>
+
+  </div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div class="detail-title" id="detailTitle">—</div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-grid" id="detailGrid"></div>
+  </div>
+
+</div>
+
+<script>
+const DETAILS = {
+  abc: {
+    name: 'ABC Couriers',
+    sections: [
+      {title:'Week Summary', body:'184 deliveries completed. 94% on-time rate, up from 91% last week. 3 exceptions, all resolved within the shift. No client complaints received. Marcus had one Driver Dark incident on Tuesday — located and back on route within 45 minutes.'},
+      {title:'Driver Performance', body:'<b>Marcus:</b> 1 dark incident, otherwise reliable. 89% on-time this week.<br/><b>Sarah:</b> Strongest week — 98% on-time, zero exceptions.<br/><b>David:</b> Solid. 94% on-time. Request to reduce Friday volume — taking note.'},
+      {title:'Client Feedback', body:'No complaints this week. One client (Northside Medical) sent a note thanking the team for proactive communication during Tuesday\'s delay. Positive signal.'},
+      {title:'Next Week Flags', body:'Marcus availability uncertain Thursday — confirm coverage. Route 7 consistently slow on Wednesdays — consider resequencing. David\'s Friday volume request: propose adjusted schedule.'}
+    ]
+  },
+  zelurco: {
+    name: 'Zelurco LLC',
+    sections: [
+      {title:'Week Summary', body:'92 deliveries. 87% on-time rate, down from 93% last week. Exception rate has more than doubled week-over-week. Thursday medical specimen routes are the primary source — 5 of 7 exceptions occurred Thursday morning.'},
+      {title:'Driver Performance', body:'<b>James:</b> Strong Mon/Tue/Wed. Thursday performance noticeably weaker — may be related to route timing.<br/><b>Patricia:</b> Reliable but stretched thin. Running back-to-back routes without adequate buffer.<br/><b>Kevin:</b> Consistent. No issues.'},
+      {title:'Client Feedback', body:'No formal complaints but client owner asked informally about Thursday delays last week. Monitor closely. If exception rate continues climbing, proactive communication recommended before they raise it.'},
+      {title:'Next Week Flags', body:'<b>Priority:</b> Restructure Thursday morning route timing — add 15-minute buffers between specimen pickups. Evaluate whether Patricia\'s Friday load needs reduction. Watch exception rate closely — if above 8 this week, escalate to account manager.'}
+    ]
+  },
+  metro: {
+    name: 'Metro Dispatch Co',
+    sections: [
+      {title:'Week Summary', body:'58 deliveries. 71% on-time rate — significantly below the 85% target in the contract. 12 exceptions, including 2 Driver Dark incidents with Linda. Client has sent 2 complaint emails this week. Churn risk is elevated.'},
+      {title:'Driver Performance', body:'<b>Linda:</b> Second dark incident this week. First was Monday, second was today (42 min, unresolved at shift end). Performance pattern is a concern — escalate.<br/><b>Robert:</b> Performing well. 91% on-time. Not the issue.'},
+      {title:'Client Feedback', body:'<b>2 complaint emails received.</b> First on Wednesday about a missed delivery window. Second today about lack of communication during Linda\'s dark incident. Client relationship is at risk. Account manager outreach needed today — not next week.'},
+      {title:'Next Week Flags', body:'<b>Immediate:</b> Account manager call with Metro Dispatch owner — acknowledge issues, share remediation plan.<br/><b>Linda:</b> Performance review required before next shift assignment. Consider reassigning her routes temporarily.<br/><b>Coverage:</b> Bring in a backup driver for Metro Dispatch until Linda situation is resolved.'}
+    ]
+  }
+};
+
+function showDetail(key){
+  const d = DETAILS[key];
+  document.getElementById('detailTitle').textContent = d.name + ' — Detailed View';
+  document.getElementById('detailGrid').innerHTML = d.sections.map(s=>`
+    <div class="detail-section">
+      <div class="ds-title">${s.title}</div>
+      <div class="ds-body">${s.body}</div>
+    </div>`).join('');
+  document.getElementById('detailPanel').classList.add('show');
+  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDetail(){
+  document.getElementById('detailPanel').classList.remove('show');
+}
+</script>
+</body>
+</html>
