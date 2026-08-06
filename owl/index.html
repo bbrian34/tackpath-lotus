@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>OWL Revenue Intelligence - TackPath Lotus OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);--mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;}
+#topbar{height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.back{font-family:var(--mono);font-size:0.72rem;color:var(--blue);text-decoration:none;}
+.owl-badge{font-family:var(--mono);font-size:0.6rem;letter-spacing:.14em;padding:2px 8px;
+  border-radius:4px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold);text-transform:uppercase;}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+.hdr{margin-bottom:28px;}
+.eyebrow{font-family:var(--mono);font-size:0.65rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.title{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.sub{color:var(--muted);font-size:0.875rem;max-width:600px;}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.kpi.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.kpi.red::before{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.kpi.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.kpi-lbl{font-family:var(--mono);font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.kpi-val{font-size:1.6rem;font-weight:800;letter-spacing:-.5px;}
+.kpi-sub{font-size:0.72rem;color:var(--muted);margin-top:4px;}
+
+.section-lbl{font-family:var(--mono);font-size:0.65rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:24px 0 12px;}
+
+.client-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.client-table th{font-family:var(--mono);font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.client-table td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:0.845rem;}
+.client-table tr:last-child td{border-bottom:none;}
+.client-table tr:hover td{background:rgba(255,255,255,.02);}
+.margin-bar{height:5px;border-radius:3px;background:var(--card2);margin-top:5px;overflow:hidden;}
+.margin-fill{height:100%;border-radius:3px;}
+.badge-margin{display:inline-block;font-family:var(--mono);font-size:0.62rem;padding:2px 7px;border-radius:4px;font-weight:700;}
+.margin-high{background:rgba(83,255,136,.1);color:var(--green);}
+.margin-mid{background:rgba(255,150,30,.1);color:var(--orange);}
+.margin-low{background:rgba(255,60,60,.1);color:var(--red);}
+
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:24px;}
+.insight{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.insight-icon{font-size:1.2rem;margin-bottom:8px;}
+.insight-title{font-weight:700;font-size:0.875rem;margin-bottom:6px;}
+.insight-body{font-size:0.8rem;color:var(--muted);line-height:1.5;}
+.insight.critical{border-color:rgba(255,60,60,.25);background:rgba(255,60,60,.03);}
+.insight.warn{border-color:rgba(255,150,30,.25);background:rgba(255,150,30,.03);}
+.insight.positive{border-color:rgba(83,255,136,.2);background:rgba(83,255,136,.03);}
+
+.ask-owl{background:var(--card);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:20px;margin-top:8px;}
+.ask-owl-title{font-size:0.875rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.ask-owl-title::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.6);}
+.owl-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.owl-preset{font-size:0.72rem;padding:4px 10px;border-radius:6px;background:var(--card2);
+  border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--mono);}
+.owl-preset:hover{border-color:var(--gold);color:var(--gold);}
+.owl-inp-row{display:flex;gap:8px;}
+.owl-inp-row input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px;color:var(--text);font-size:0.845rem;font-family:'DM Sans',sans-serif;}
+.owl-inp-row input:focus{outline:none;border-color:rgba(201,168,76,.4);}
+.owl-inp-row button{padding:8px 14px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);
+  color:var(--gold);border-radius:8px;cursor:pointer;font-weight:700;font-size:0.845rem;}
+.owl-inp-row button:disabled{opacity:.4;cursor:not-allowed;}
+.owl-response{margin-top:12px;font-size:0.845rem;line-height:1.6;color:var(--text);
+  background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:8px;
+  padding:12px;display:none;}
+.owl-response.show{display:block;}
+.owl-thinking{font-family:var(--mono);font-size:0.72rem;color:var(--gold);padding:8px 0;display:none;}
+.owl-thinking.show{display:block;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="../index.html" class="back">&larr; Lotus OS</a>
+  <div class="owl-badge">OWL Intelligence</div>
+  <span style="font-family:var(--mono);font-size:0.72rem;color:var(--faint);margin-left:8px;">ABC Couriers — Q3 2026 · Simulated data</span>
+</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="eyebrow">Revenue Intelligence</div>
+    <div class="title">OWL Dashboard</div>
+    <div class="sub">Per-client margin analysis, route profitability, and revenue intelligence for the courier company. The feature that moves TackPath from dispatch software to business operating system.</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-lbl">Total Revenue</div>
+      <div class="kpi-val" style="color:var(--blue);">$184,200</div>
+      <div class="kpi-sub">Q3 2026 · 6 active clients</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-lbl">Gross Margin</div>
+      <div class="kpi-val" style="color:var(--green);">23.4%</div>
+      <div class="kpi-sub">↑ 2.1% vs Q2</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-lbl">Margin Risk</div>
+      <div class="kpi-val" style="color:var(--red);">2 clients</div>
+      <div class="kpi-sub">Below 10% margin threshold</div>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-lbl">Best Performing</div>
+      <div class="kpi-val" style="color:var(--gold);">Atlanta Legal</div>
+      <div class="kpi-sub">38.2% margin · low exception rate</div>
+    </div>
+  </div>
+
+  <div class="section-lbl">Per-Client Profitability</div>
+  <table class="client-table">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Revenue</th>
+        <th>Cost to Service</th>
+        <th>Gross Margin</th>
+        <th>Deliveries</th>
+        <th>Exceptions</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Atlanta Legal Services</b><div style="font-size:0.72rem;color:var(--muted);">Recurring · Mon/Wed/Fri</div></td>
+        <td>$42,000</td>
+        <td>$25,900</td>
+        <td>
+          <span class="badge-margin margin-high">38.2%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:38.2%;background:var(--green);"></div></div>
+        </td>
+        <td>847</td>
+        <td style="color:var(--green);">3</td>
+        <td><span style="color:var(--green);font-family:var(--mono);font-size:0.72rem;">Healthy</span></td>
+      </tr>
+      <tr>
+        <td><b>Northside Medical Group</b><div style="font-size:0.72rem;color:var(--muted);">Specimen transport · daily</div></td>
+        <td>$38,400</td>
+        <td>$27,100</td>
+        <td>
+          <span class="badge-margin margin-high">29.4%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:29.4%;background:var(--blue);"></div></div>
+        </td>
+        <td>612</td>
+        <td style="color:var(--orange);">11</td>
+        <td><span style="color:var(--blue);font-family:var(--mono);font-size:0.72rem;">Healthy</span></td>
+      </tr>
+      <tr>
+        <td><b>Peachtree Pharmacy Chain</b><div style="font-size:0.72rem;color:var(--muted);">Same-day prescriptions</div></td>
+        <td>$31,200</td>
+        <td>$24,800</td>
+        <td>
+          <span class="badge-margin margin-mid">20.5%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:20.5%;background:var(--orange);"></div></div>
+        </td>
+        <td>1,240</td>
+        <td style="color:var(--orange);">18</td>
+        <td><span style="color:var(--orange);font-family:var(--mono);font-size:0.72rem;">Watch</span></td>
+      </tr>
+      <tr>
+        <td><b>Cobb County Warehousing</b><div style="font-size:0.72rem;color:var(--muted);">Tues/Thurs bulk routes</div></td>
+        <td>$28,600</td>
+        <td>$26,400</td>
+        <td>
+          <span class="badge-margin margin-low">7.7%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:7.7%;background:var(--red);"></div></div>
+        </td>
+        <td>284</td>
+        <td style="color:var(--red);">27</td>
+        <td><span style="color:var(--red);font-family:var(--mono);font-size:0.72rem;">⚠ At Risk</span></td>
+      </tr>
+      <tr>
+        <td><b>Sandy Springs Office Park</b><div style="font-size:0.72rem;color:var(--muted);">Daily document delivery</div></td>
+        <td>$24,800</td>
+        <td>$23,400</td>
+        <td>
+          <span class="badge-margin margin-low">5.6%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:5.6%;background:var(--red);"></div></div>
+        </td>
+        <td>496</td>
+        <td style="color:var(--red);">32</td>
+        <td><span style="color:var(--red);font-family:var(--mono);font-size:0.72rem;">⚠ Losing</span></td>
+      </tr>
+      <tr>
+        <td><b>Buckhead Retail Group</b><div style="font-size:0.72rem;color:var(--muted);">On-demand · variable</div></td>
+        <td>$19,200</td>
+        <td>$11,800</td>
+        <td>
+          <span class="badge-margin margin-high">38.5%</span>
+          <div class="margin-bar"><div class="margin-fill" style="width:38.5%;background:var(--green);"></div></div>
+        </td>
+        <td>320</td>
+        <td style="color:var(--green);">4</td>
+        <td><span style="color:var(--green);font-family:var(--mono);font-size:0.72rem;">Healthy</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-lbl">OWL Insights — Automatically Generated</div>
+  <div class="insight-grid">
+    <div class="insight critical">
+      <div class="insight-title">Sandy Springs Office Park is losing money</div>
+      <div class="insight-body">At 5.6% gross margin, this contract costs $23,400 to service while generating $24,800 in revenue. Any route exception or overtime pushes this into negative territory. The Tuesday routes specifically run at a loss due to traffic-related overtime. Recommend contract renegotiation or route restructuring before Q4.</div>
+    </div>
+    <div class="insight critical">
+      <div class="insight-title">Cobb County exceptions are compounding the margin problem</div>
+      <div class="insight-body">27 exceptions this quarter — the highest of any client — are adding unplanned labor cost to an already thin 7.7% margin. Thursday bulk routes account for 19 of those exceptions. At this rate, Q4 will likely tip this contract negative.</div>
+    </div>
+    <div class="insight warn">
+      <div class="insight-title">Peachtree Pharmacy exception rate is climbing</div>
+      <div class="insight-body">18 exceptions this quarter vs. 9 in Q2 — a doubling. If this trend continues, the 20.5% margin compresses toward the 10% risk threshold. The Saturday morning routes are generating disproportionate exceptions due to driver availability.</div>
+    </div>
+    <div class="insight positive">
+      <div class="insight-title">Atlanta Legal and Buckhead Retail are high-value anchors</div>
+      <div class="insight-body">Both contracts run above 38% margin with low exception rates. These are the model contracts — recurring, predictable, well-structured. Prioritize driver assignment quality and consistency on these routes to protect the relationship.</div>
+    </div>
+  </div>
+
+  <div class="ask-owl">
+    <div class="ask-owl-title">Ask OWL</div>
+    <div class="owl-presets">
+      <button class="owl-preset" onclick="askOwl('Which client should we renegotiate with first and why?')">Which client to renegotiate?</button>
+      <button class="owl-preset" onclick="askOwl('What would happen to our overall margin if we lost Sandy Springs?')">Impact of losing Sandy Springs?</button>
+      <button class="owl-preset" onclick="askOwl('Which routes are most profitable on a per-stop basis?')">Most profitable routes?</button>
+      <button class="owl-preset" onclick="askOwl('Write a brief talking points memo for the owner about Q3 margin performance')">Q3 memo for owner</button>
+    </div>
+    <div class="owl-inp-row">
+      <input type="text" id="owlInp" placeholder="Ask OWL anything about revenue, margin, or client profitability..." onkeydown="if(event.key==='Enter')askOwl()"/>
+      <button id="owlBtn" onclick="askOwl()">Ask →</button>
+    </div>
+    <div class="owl-thinking" id="owlThinking">OWL is analyzing your revenue data...</div>
+    <div class="owl-response" id="owlResponse"></div>
+  </div>
+
+</div>
+
+<script>
+const OWL_SYSTEM = `You are OWL, TackPath's revenue intelligence agent. You have access to ABC Couriers' Q3 2026 financial data.
+
+DATA:
+- Atlanta Legal Services: $42,000 revenue, $25,900 cost, 38.2% margin, 847 deliveries, 3 exceptions. Recurring Mon/Wed/Fri.
+- Northside Medical Group: $38,400 revenue, $27,100 cost, 29.4% margin, 612 deliveries, 11 exceptions. Daily specimen transport.
+- Peachtree Pharmacy Chain: $31,200 revenue, $24,800 cost, 20.5% margin, 1,240 deliveries, 18 exceptions (doubled from Q2).
+- Cobb County Warehousing: $28,600 revenue, $26,400 cost, 7.7% margin, 284 deliveries, 27 exceptions. Tues/Thurs bulk.
+- Sandy Springs Office Park: $24,800 revenue, $23,400 cost, 5.6% margin, 496 deliveries, 32 exceptions. Daily documents.
+- Buckhead Retail Group: $19,200 revenue, $11,800 cost, 38.5% margin, 320 deliveries, 4 exceptions. On-demand.
+
+Total revenue: $184,200. Overall margin: 23.4% (up 2.1% from Q2). Risk threshold: below 10% margin.
+
+Your role: Give the courier company owner executive-level financial intelligence. Be specific with numbers. Be honest about what the data shows. Keep answers concise — 3-5 sentences unless a full memo is requested. Never make up numbers not in the data.`;
+
+async function askOwl(text){
+  const inp = document.getElementById('owlInp');
+  const q = text || inp.value.trim();
+  if(!q) return;
+  inp.value='';
+  document.getElementById('owlBtn').disabled=true;
+  document.getElementById('owlThinking').classList.add('show');
+  document.getElementById('owlResponse').classList.remove('show');
+
+  try{
+    const r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,system:OWL_SYSTEM,messages:[{role:'user',content:q}]})
+    });
+    const d = await r.json();
+    const reply = d.content?.[0]?.text || 'No response.';
+    document.getElementById('owlThinking').classList.remove('show');
+    const resp = document.getElementById('owlResponse');
+    resp.innerHTML = reply.replace(/\n/g,'<br/>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+    resp.classList.add('show');
+  }catch(e){
+    document.getElementById('owlThinking').classList.remove('show');
+    document.getElementById('owlResponse').textContent='API error: '+e.message;
+    document.getElementById('owlResponse').classList.add('show');
+  }
+  document.getElementById('owlBtn').disabled=false;
+}
+</script>
+</body>
+</html>
