@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Shift Handoff - TackPath Lotus OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);--mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+#topbar{height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.back{font-family:var(--mono);font-size:0.72rem;color:var(--blue);text-decoration:none;}
+.page-badge{font-family:var(--mono);font-size:0.6rem;letter-spacing:.14em;padding:2px 8px;
+  border-radius:4px;background:rgba(83,255,136,.1);border:1px solid rgba(83,255,136,.25);color:var(--green);text-transform:uppercase;}
+.wrap{max-width:860px;margin:0 auto;padding:28px 20px 60px;}
+
+.client-selector{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+.client-btn{padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid var(--border);
+  color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.client-btn.active{border-color:rgba(83,255,136,.35);background:rgba(83,255,136,.08);color:var(--green);}
+
+.generate-btn{width:100%;padding:14px;border-radius:10px;background:rgba(83,255,136,.1);
+  border:1px solid rgba(83,255,136,.25);color:var(--green);font-weight:700;font-size:0.95rem;
+  cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:20px;}
+.generate-btn:hover{background:rgba(83,255,136,.18);}
+.generate-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.thinking{font-family:var(--mono);font-size:0.72rem;color:var(--green);padding:12px 0;display:none;text-align:center;}
+.thinking.show{display:block;}
+
+.report{display:none;}
+.report.show{display:block;}
+.report-header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:16px;}
+.report-title{font-size:1.2rem;font-weight:800;margin-bottom:4px;}
+.report-meta{font-family:var(--mono);font-size:0.7rem;color:var(--muted);}
+.report-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+.report-section-title{font-family:var(--mono);font-size:0.65rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.report-body{font-size:0.875rem;line-height:1.7;color:var(--text);}
+.report-body b{color:var(--text);}
+
+.print-btn{padding:9px 18px;border-radius:8px;background:var(--card2);border:1px solid var(--border);
+  color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:16px;}
+.print-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.stat{background:var(--card2);border-radius:8px;padding:12px;text-align:center;}
+.stat-val{font-size:1.4rem;font-weight:800;margin-bottom:2px;}
+.stat-lbl{font-family:var(--mono);font-size:0.6rem;color:var(--muted);text-transform:uppercase;}
+
+#lotus-nav{height:38px;display:flex;align-items:center;padding:0 20px;gap:6px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid rgba(255,150,30,.15);font-family:'DM Mono',monospace;font-size:0.65rem;overflow-x:auto;white-space:nowrap;}
+.lnav-home{color:rgba(255,150,30,.8);text-decoration:none;font-weight:700;letter-spacing:.08em;margin-right:8px;flex-shrink:0;}
+.lnav-sep{color:rgba(255,255,255,.15);margin:0 4px;flex-shrink:0;}
+.lnav-link{color:rgba(238,244,255,.45);text-decoration:none;padding:3px 8px;border-radius:4px;transition:all .15s;flex-shrink:0;}
+.lnav-link:hover{color:var(--text,#eef4ff);background:rgba(255,255,255,.05);}
+.lnav-link.active{color:#ff961e;background:rgba(255,150,30,.08);}
+</style>
+</head>
+<body>
+<div id="lotus-nav">
+  <a class="lnav-home" href="index.html">LOTUS OS</a>
+  <span class="lnav-sep">|</span>
+  <a class="lnav-link " href="index.html">Overview</a>
+  <a class="lnav-link " href="operator/dashboard.html">Operator</a>
+  <a class="lnav-link " href="supabase-mcp-demo.html">Exception Agent</a>
+  <a class="lnav-link " href="owl/index.html">OWL</a>
+  <a class="lnav-link  active" href="handoff.html">Handoff</a>
+  <a class="lnav-link " href="clients.html">Clients</a>
+</div>
+
+
+<div id="topbar">
+  <a href="index.html" class="back">&larr; Lotus OS</a>
+  <div class="page-badge">Shift Handoff</div>
+  <span style="font-family:var(--mono);font-size:0.68rem;color:var(--faint);margin-left:4px;">AI-generated end-of-shift report · simulated data</span>
+</div>
+
+<div class="wrap">
+  <div style="margin-bottom:20px;">
+    <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:6px;">Shift Handoff Generator</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">End-of-Shift Report</div>
+    <div style="font-size:0.875rem;color:var(--muted);">Select a client and generate a complete handoff report for the incoming operator — what happened this shift, exceptions handled, driver performance, and what needs attention.</div>
+  </div>
+
+  <div class="client-selector">
+    <button class="client-btn active" onclick="selectClient(this,'abc')">ABC Couriers</button>
+    <button class="client-btn" onclick="selectClient(this,'zelurco')">Zelurco LLC</button>
+    <button class="client-btn" onclick="selectClient(this,'metro')">Metro Dispatch Co</button>
+  </div>
+
+  <button class="generate-btn" id="generateBtn" onclick="generateReport()">Generate Shift Handoff Report →</button>
+  <div class="thinking" id="thinking">AI is compiling the shift summary...</div>
+
+  <div class="report" id="report">
+    <div class="report-header">
+      <div class="report-title" id="reportTitle">—</div>
+      <div class="report-meta" id="reportMeta">—</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val" id="s1" style="color:var(--blue);">—</div><div class="stat-lbl">Jobs Total</div></div>
+      <div class="stat"><div class="stat-val" id="s2" style="color:var(--green);">—</div><div class="stat-lbl">Delivered</div></div>
+      <div class="stat"><div class="stat-val" id="s3" style="color:var(--orange);">—</div><div class="stat-lbl">In Progress</div></div>
+      <div class="stat"><div class="stat-val" id="s4" style="color:var(--red);">—</div><div class="stat-lbl">Exceptions</div></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">Shift Summary</div>
+      <div class="report-body" id="rSummary">—</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">Exceptions & How They Were Handled</div>
+      <div class="report-body" id="rExceptions">—</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">Driver Performance Notes</div>
+      <div class="report-body" id="rDrivers">—</div>
+    </div>
+    <div class="report-section" style="border-color:rgba(255,150,30,.25);background:rgba(255,150,30,.03);">
+      <div class="report-section-title" style="color:var(--orange);">What the Next Operator Needs to Know</div>
+      <div class="report-body" id="rHandoff">—</div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+</div>
+
+<script>
+const CLIENTS = {
+  abc: {
+    name: 'ABC Couriers', shift: 'Day Shift 06:00–14:00',
+    stats: {total:4, delivered:1, inprogress:2, exceptions:3},
+    data: `Client: ABC Couriers, Day Shift 06:00-14:00 ATL
+Jobs: 4 total. job-001 Surge Route A in_transit (Marcus, 3/8 stops done, 47min past ETA). job-002 Peachtree Delivery pending (no driver, 22min unassigned). job-003 Surge Route B in_transit (Sarah, 5/7 stops, 18min to ETA). job-004 Midtown Run delivered (David, complete).
+Drivers: Marcus DARK 38min no GPS, last at 33.759/-84.390. Sarah active 24mph 2min ago. David idle delivered.
+Exceptions handled: 1) Driver Dark - Marcus went dark during Surge Route A after stop 3. Check-in message sent. Client notifications drafted for stops 4-8. 2) Late - job-001 now 47min past ETA, clients notified of delay. 3) Unassigned - job-002 sat 22min, broadcast sent to David who is now available after completing his delivery.`
+  },
+  zelurco: {
+    name: 'Zelurco LLC', shift: 'Day Shift 08:00–16:00',
+    stats: {total:3, delivered:1, inprogress:2, exceptions:0},
+    data: `Client: Zelurco LLC, Day Shift 08:00-16:00 ATL
+Jobs: 3 total. job-Z01 Medical Docs Run in_transit (James, 2/3 stops, 12min to ETA). job-Z02 Warehouse Route in_transit (Patricia, 7/10 stops, 25min to ETA). job-Z03 Airport Pickup delivered (Kevin, complete).
+Drivers: James active 1min ago. Patricia active 3min ago. Kevin idle delivered.
+Exceptions: None this shift. All drivers active and on schedule. Clean shift so far.`
+  },
+  metro: {
+    name: 'Metro Dispatch Co', shift: 'Evening Shift 14:00–22:00',
+    stats: {total:2, delivered:0, inprogress:2, exceptions:2},
+    data: `Client: Metro Dispatch Co, Evening Shift 14:00-22:00 ATL
+Jobs: 2 total. job-M01 Buckhead Loop in_transit (Linda, 1/6 stops, 15min past ETA). job-M02 Sandy Springs Run in_transit (Robert, 3/5 stops, 8min to ETA).
+Drivers: Linda DARK 42min no GPS. Robert active 4min ago.
+Exceptions: 1) Driver Dark - Linda went dark after stop 1 on Buckhead Loop. 42 minutes no GPS. Check-in sent, no response. Physical location unknown. 2) Late - job-M01 now 15min past ETA with 5 stops remaining and driver unreachable.`
+  }
+};
+
+let selectedClient = 'abc';
+
+function selectClient(btn, key){
+  document.querySelectorAll('.client-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedClient = key;
+  document.getElementById('report').classList.remove('show');
+}
+
+async function generateReport(){
+  const client = CLIENTS[selectedClient];
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('thinking').classList.add('show');
+  document.getElementById('report').classList.remove('show');
+
+  const prompt = `Generate a concise end-of-shift handoff report for a TackPath Lotus operator. Here is the shift data:
+
+${client.data}
+
+Write four sections:
+1. SHIFT SUMMARY: 2-3 sentences on what happened overall this shift.
+2. EXCEPTIONS & HOW THEY WERE HANDLED: Specific details on each exception — what happened, what actions were taken, what's still unresolved.
+3. DRIVER PERFORMANCE NOTES: Brief honest note on each driver this shift.
+4. WHAT THE NEXT OPERATOR NEEDS TO KNOW: The 2-3 most important things for the incoming operator to act on immediately.
+
+Be specific and concise. Use real driver names and job IDs. No fluff.`;
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:800,
+        messages:[{role:'user', content:prompt}]})
+    });
+    const d = await r.json();
+    const text = d.content?.[0]?.text || '';
+
+    // Parse into sections
+    const sections = ['SHIFT SUMMARY','EXCEPTIONS & HOW THEY WERE HANDLED','DRIVER PERFORMANCE NOTES','WHAT THE NEXT OPERATOR NEEDS TO KNOW'];
+    const ids = ['rSummary','rExceptions','rDrivers','rHandoff'];
+
+    let remaining = text;
+    sections.forEach((sec, i) => {
+      const nextSec = sections[i+1];
+      let idx = remaining.search(new RegExp(sec,'i'));
+      let end = nextSec ? remaining.search(new RegExp(nextSec,'i')) : remaining.length;
+      if(idx !== -1){
+        let content = remaining.slice(idx + sec.length, end !== -1 ? end : remaining.length).trim().replace(/^[:.\n]+/,'').trim();
+        document.getElementById(ids[i]).innerHTML = content.replace(/\n/g,'<br/>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+      }
+    });
+
+    // Fill header and stats
+    const now = new Date();
+    document.getElementById('reportTitle').textContent = client.name + ' — Shift Handoff';
+    document.getElementById('reportMeta').textContent = client.shift + ' · Generated ' + now.toLocaleTimeString() + ' by TackPath Lotus OS';
+    document.getElementById('s1').textContent = client.stats.total;
+    document.getElementById('s2').textContent = client.stats.delivered;
+    document.getElementById('s3').textContent = client.stats.inprogress;
+    document.getElementById('s4').textContent = client.stats.exceptions;
+
+    document.getElementById('report').classList.add('show');
+  } catch(e) {
+    alert('API error: ' + e.message);
+  }
+
+  document.getElementById('thinking').classList.remove('show');
+  document.getElementById('generateBtn').disabled = false;
+}
+</script>
+</body>
+</html>
